@@ -1,3 +1,0 @@
-queriesSubset - first 500 queries from queries.dev.train
-
-queries.py - generates a file with the top X queries from queries.dev.train (must be placed in this folder)
