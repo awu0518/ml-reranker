@@ -1,2 +1,3 @@
 queriesSubset - first 500 queries from queries.dev.train
 serp.py - calls Serper.dev API on queries from queriesSubset, place API_KEY in .env
+serp_links.jsonl - file containing {queryID, query, page, rank, url, title, snippet}
