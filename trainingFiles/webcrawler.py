@@ -6,8 +6,6 @@ import socket
 from queue import Queue
 from urllib.robotparser import RobotFileParser
 from urllib.parse import urlparse
-from html.parser import HTMLParser
-import os
 import json
 import trafilatura
 
@@ -15,7 +13,7 @@ import trafilatura
 UA = "azw7225@nyu.edu"
 TARGET_TOTAL = 1000
 REQUEST_TIMEOUT = 8
-THREADS = 4
+THREADS = 10
 
 CONFIG = trafilatura.settings.use_config()
 CONFIG.set("DEFAULT", "include_comments", "no")
@@ -44,6 +42,7 @@ rpCache: dict[str, RobotFileParser] = {}
 rpLock = Lock()
 
 serpQueue = Queue() # holds (JSON, docID)
+writeLock = Lock()
 
 # Adds user agent to urllib.request calls
 _opener = urllib.request.build_opener()
@@ -98,7 +97,6 @@ def worker():
     while not STOP.is_set():
         jsonObj, docID = serpQueue.get()
         if jsonObj is None:
-            STOP.set()
             break  # global stop
 
         if not validLink(jsonObj["url"]) or not canParseRobot(jsonObj["url"]):
@@ -133,8 +131,9 @@ def worker():
             "passage_id": docID,
             "url": jsonObj["url"]
         }
-        with open(outPath, "a", encoding="utf-8") as f:
-            f.write(json.dumps(doc, ensure_ascii=False) + "\n")
+        with writeLock:
+            with open(outPath, "a", encoding="utf-8") as f:
+                f.write(json.dumps(doc, ensure_ascii=False) + "\n")
 
 def main():
     docID = 1
@@ -144,7 +143,8 @@ def main():
             serpQueue.put((obj, docID))
             docID += 1
 
-    serpQueue.put((None, None))
+    for _ in range(THREADS):
+        serpQueue.put((None, None))
 
     for _ in range(THREADS):
         Thread(target=worker, daemon=True).start()

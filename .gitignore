@@ -1,2 +1,6 @@
 models/
 links/.env
+trainingFiles/queries
+trainingFiles/passages
+trainingFiles/bestPassages
+trainingFiles/bestPassagesCE
