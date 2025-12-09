@@ -2,9 +2,9 @@ import json
 import os
 from sentence_transformers import CrossEncoder
 
-MODEL_NAME = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+MODEL_NAME = "mixedbread-ai/mxbai-rerank-large-v1"
 # If you have GPU: CrossEncoder(MODEL_NAME, device="cuda")
-model = CrossEncoder(MODEL_NAME)
+model = CrossEncoder(MODEL_NAME, device="cuda")
 
 def getBestPassage(file_obj, model: CrossEncoder):
     passages = []
